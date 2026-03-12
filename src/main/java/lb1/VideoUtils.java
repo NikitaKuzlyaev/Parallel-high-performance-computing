@@ -3,13 +3,13 @@ package lb1;
 import lombok.SneakyThrows;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameGrabber;
 
 public class VideoUtils {
 
     // Подсчет числа кадров видео.
     // Метаданные могут быть ошибочными. Этот метод - нет
-    @SneakyThrows
-    public static int getFrames(String videoPath) {
+    public static int getFrames(String videoPath) throws FrameGrabber.Exception {
 
         try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoPath)) {
             grabber.start();

@@ -17,10 +17,7 @@ public class CalculateColorChannelsHistogramTask implements FrameTask {
 
     @Override
     public FrameResult process(FrameCapsule frame) {
-        System.out.println("here 2");
-
-        //BufferedImage img = converter.getBufferedImage(org.bytedeco.librealsense.frame.frame());
-        System.out.println("here 3" + frame.frameNumber());
+        System.out.println("> enter [process] on frame " + frame.frameNumber());
 
         double[][] hist = computeAllHistograms(frame.image(), numberOfKvants);
         double[] merged = new double[3 * numberOfKvants];
