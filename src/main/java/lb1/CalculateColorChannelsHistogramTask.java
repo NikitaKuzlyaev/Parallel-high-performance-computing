@@ -1,11 +1,6 @@
 package lb1;
 
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.Java2DFrameConverter;
-import org.bytedeco.librealsense.frame;
-
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 
 public class CalculateColorChannelsHistogramTask implements FrameTask {
 

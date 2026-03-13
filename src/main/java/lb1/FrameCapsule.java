@@ -1,7 +1,5 @@
 package lb1;
 
-import org.bytedeco.javacv.Frame;
-
 import java.awt.image.BufferedImage;
 
 public class FrameCapsule {
@@ -15,6 +13,11 @@ public class FrameCapsule {
         this.frameNumber = frameNumber;
     }
 
-    public BufferedImage image() { return image; }
-    public int frameNumber() { return frameNumber; }
+    public BufferedImage image() {
+        return image;
+    }
+
+    public int frameNumber() {
+        return frameNumber;
+    }
 }

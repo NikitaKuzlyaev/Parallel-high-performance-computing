@@ -1,10 +1,8 @@
 package lb1;
 
-import lombok.SneakyThrows;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Java2DFrameConverter;
-import utils.Benchmark;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -65,8 +63,7 @@ public class VideoProcessingPipeline {
     }
 
     public void compile(List<FrameResult> frames, double threshold, String outputPath)
-            throws FFmpegFrameRecorder.Exception
-    {
+            throws FFmpegFrameRecorder.Exception {
 
         int width = frames.get(0).image().getWidth();
         int height = frames.get(0).image().getHeight();

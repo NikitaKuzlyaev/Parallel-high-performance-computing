@@ -8,11 +8,11 @@ import java.util.List;
 
 public class Main {
 
-    static void main() throws Exception {
+    public static void main(String[] args) throws Exception {
 
         String inputVideoPath;
 
-        // Расскоментировать один из блоков ниже
+        // Раскоментировать один из блоков ниже
         // (в зависимости от того, обработку какого видео нужно протестировать)
 
         {
@@ -33,10 +33,11 @@ public class Main {
         //int numberOfWorkers = 2;
         int[] numberOfWorkersGrid = new int[]{
                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-                16, 20, 24, 28, 32, 48, 64, 72, 96, 128, 256, 512, 1024, 2048, 4096, 8192
+                16, 20, 24, 28, 32, 48, 64, 72, 96, 128, 256,
+                512, 1024, 2048, 4096, 8192
         };
 
-        int sizeOfVector = 10; // Чем болльше - тем лучше!!!!!! :)
+        int sizeOfVector = 10; // Чем больше - тем лучше!!!!!! :)
         double threshold = 0.32d; // Методом тыка это оказалось самым адекватным значением
         int timesToRepeat = 3;
 
@@ -66,12 +67,12 @@ public class Main {
                 FrameTask videoFrameTask = new CalculateColorChannelsHistogramTask(sizeOfVector);
 
 
-                long enterTime = System.nanoTime(); // Время входа (начало обработки видео)
+                long enterTime = System.nanoTime(); // Время входа
 
                 // Тут происходит запуск всего. В объекте пайплайна, что был определен выше
                 frameResults = processingPipeline.process(videoFrameTask);
 
-                long exitTime = System.nanoTime(); // Время выхода (завершение обработки видео)
+                long exitTime = System.nanoTime(); // Время выхода
                 long duration = (exitTime - enterTime) / 1_000_000; // выводим за сколько выполнилась обработка
                 System.out.println("Execution time = " + duration + "ms");
 
