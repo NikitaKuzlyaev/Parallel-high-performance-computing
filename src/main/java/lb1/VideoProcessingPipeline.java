@@ -16,20 +16,29 @@ import java.util.concurrent.*;
 public class VideoProcessingPipeline {
 
     private final int workers;
+    private final BlockingQueue<FrameCapsule> frameQueue;
+    private final BlockingQueue<FrameResult> resultQueue;
+    private final ExecutorService executor;
 
-    public VideoProcessingPipeline(int workers) {
+    public VideoProcessingPipeline(
+            int workers,
+            int frameQueueCapacity,
+            int resultQueueCapacity
+    ) {
         this.workers = workers;
+        frameQueue = new ArrayBlockingQueue<>(400);
+        resultQueue = new ArrayBlockingQueue<>(400);
+        executor = Executors.newFixedThreadPool(workers + 1);
     }
 
-    @Benchmark
-    public List<FrameResult> process(String videoPath, FrameTask task) throws Exception {
-
-        BlockingQueue<FrameCapsule> frameQueue = new ArrayBlockingQueue<>(400);
-        BlockingQueue<FrameResult> resultQueue = new ArrayBlockingQueue<>(400);
-
-        ExecutorService executor = Executors.newFixedThreadPool(workers + 1);
-
+    public void preprocess(String videoPath) throws Exception {
         executor.submit(new FrameProducer(videoPath, frameQueue, workers));
+    }
+
+    // @Benchmark
+    public List<FrameResult> process(FrameTask task) throws Exception {
+
+        //executor.submit(new FrameProducer(videoPath, frameQueue, workers));
 
         for (int i = 0; i < workers; i++) {
             executor.submit(new FrameWorker(frameQueue, resultQueue, task));
@@ -51,7 +60,7 @@ public class VideoProcessingPipeline {
         executor.shutdown();
         executor.awaitTermination(3, TimeUnit.SECONDS);
 
-        System.out.println("END");
+        //System.out.println("END");
         return results;
     }
 
