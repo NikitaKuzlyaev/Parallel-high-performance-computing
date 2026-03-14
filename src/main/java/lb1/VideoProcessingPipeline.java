@@ -30,7 +30,11 @@ public class VideoProcessingPipeline {
     }
 
     public void preprocess(String videoPath) throws Exception {
-        executor.submit(new FrameProducer(videoPath, frameQueue, workers));
+        /*
+        Метод, запускающий поток, который будет готовить кадры и помещать их в очередь на обработку
+         */
+        Runnable callback = new FrameProducerCallback(frameQueue, workers);
+        executor.submit(new FrameProducer(videoPath, frameQueue, callback));
     }
 
     // @Benchmark

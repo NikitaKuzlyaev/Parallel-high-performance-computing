@@ -12,23 +12,23 @@ public class FrameProducer implements Runnable {
 
     private final FFmpegFrameGrabber grabber;
     private final BlockingQueue<FrameCapsule> queue;
-    private final int numWorkers;
-
+    private final Runnable callback;
 
     public FrameProducer(
             String videoPath,
             BlockingQueue<FrameCapsule> queue,
-            int numWorkers
+            Runnable callback
     ) throws Exception {
         this.grabber = new FFmpegFrameGrabber(videoPath);
         this.queue = queue;
-        this.numWorkers = numWorkers;
-        grabber.start();
+        this.callback = callback;
     }
 
     @Override
     public void run() {
         try {
+            grabber.start();
+
             Java2DFrameConverter converter = new Java2DFrameConverter();
             Frame frame;
             int frameNumber = 0;
@@ -44,12 +44,9 @@ public class FrameProducer implements Runnable {
                 queue.put(new FrameCapsule(imgClone, frameNumber++));
             }
 
-            // посылаем каждому воркеру POISON_PILL
-            for (int i = 0; i < numWorkers; i++) {
-                queue.put(FrameCapsule.POISON_PILL);
-            }
-
+            callback.run();
             grabber.stop();
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
