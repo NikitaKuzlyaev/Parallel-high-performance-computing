@@ -17,7 +17,7 @@ public class Main {
 
         {
             // Видео 1
-            //inputVideoPath = "src/main/java/lb1/statics/videos/input/video_1.avi";
+            inputVideoPath = "src/main/java/lb1/statics/videos/input/video_1.avi";
         }
 
         {
@@ -27,7 +27,7 @@ public class Main {
 
         {
             // Видео 3
-            inputVideoPath = "src/main/java/lb1/statics/videos/input/video_3.mp4";
+            // inputVideoPath = "src/main/java/lb1/statics/videos/input/video_3.mp4";
         }
 
         //int numberOfWorkers = 2;
@@ -37,15 +37,16 @@ public class Main {
                 512, 1024, 2048, 4096, 8192
         };
 
+
         int sizeOfVector = 10; // Чем больше - тем лучше!!!!!! :)
         double threshold = 0.32d; // Методом тыка это оказалось самым адекватным значением
-        int timesToRepeat = 3;
+        int timesToRepeat = 0;
 
         HashMap<Integer, List<Long>> results = new HashMap<>();
         List<FrameResult> frameResults;
 
         // Болид должен начинать гонку разогретым
-        int warmup_repeats = 1;
+        int warmup_repeats = 0;
 
 
         for (int gridIdx = 0; gridIdx < numberOfWorkersGrid.length; gridIdx++) {
@@ -87,8 +88,8 @@ public class Main {
         System.out.println(results);
 
         // Код ниже использовался для компилияции видео, на котором будут подписи сцен и прочего
-        // String outputVideoPath = "output.mp4";
-        // compileVideo(inputVideoPath, sizeOfVector, threshold, outputVideoPath);
+        String outputVideoPath = "output.mp4";
+        compileVideo(inputVideoPath, sizeOfVector, threshold, outputVideoPath);
     }
 
     static private void compileVideo(String inputVideoPath, int sizeOfVector, double threshold, String outputVideoPath) throws Exception {
