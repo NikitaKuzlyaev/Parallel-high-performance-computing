@@ -24,8 +24,8 @@ public class VideoProcessingPipeline {
             int resultQueueCapacity
     ) {
         this.workers = workers;
-        frameQueue = new ArrayBlockingQueue<>(400);
-        resultQueue = new ArrayBlockingQueue<>(400);
+        frameQueue = new ArrayBlockingQueue<>(frameQueueCapacity);
+        resultQueue = new ArrayBlockingQueue<>(resultQueueCapacity);
         // на один воркер больше - отдельный воркер, который готовит кадры для обработки
         // его задачи сильно легче - поэтому ему хватит одного потока и мы потом дадим ему фору по времени
         executor = Executors.newFixedThreadPool(workers + 1);
