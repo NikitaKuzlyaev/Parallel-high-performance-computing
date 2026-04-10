@@ -1,4 +1,4 @@
-package lb1;
+package common;
 
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;

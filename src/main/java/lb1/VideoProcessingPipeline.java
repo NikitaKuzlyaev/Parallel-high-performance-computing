@@ -1,5 +1,6 @@
 package lb1;
 
+import common.*;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Java2DFrameConverter;
@@ -11,7 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class VideoProcessingPipeline {
+class VideoProcessingPipeline {
 
     private final int workers; // число воркеров (потоков) для выполнения задачи
     private final BlockingQueue<FrameCapsule> frameQueue; // очередь с кадрами на обработку

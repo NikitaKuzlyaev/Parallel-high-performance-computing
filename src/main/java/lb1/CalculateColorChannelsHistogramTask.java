@@ -1,5 +1,9 @@
 package lb1;
 
+import common.FrameCapsule;
+import common.FrameResult;
+import common.FrameTask;
+
 import java.awt.image.BufferedImage;
 
 public class CalculateColorChannelsHistogramTask implements FrameTask {

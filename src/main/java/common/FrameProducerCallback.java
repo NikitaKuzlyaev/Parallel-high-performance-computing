@@ -1,4 +1,4 @@
-package lb1;
+package common;
 
 import java.util.concurrent.BlockingQueue;
 

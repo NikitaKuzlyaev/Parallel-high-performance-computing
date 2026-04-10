@@ -1,12 +1,15 @@
 package lb1;
 
 
+import common.FrameResult;
+import common.FrameTask;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 
-public class Main {
+class Main {
 
     public static void main(String[] args) throws Exception {
 

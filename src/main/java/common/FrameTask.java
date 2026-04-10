@@ -1,4 +1,4 @@
-package lb1;
+package common;
 
 @FunctionalInterface
 public interface FrameTask {
