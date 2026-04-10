@@ -9,18 +9,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-class Main {
-
-
-    // Раскоментировать необходимый путь для используемоего GpuFrameProcessor
+class MainCuda {
+// Раскоментировать необходимый путь для используемоего GpuFrameProcessor
 
     // CudaFrameProcessor2d2d
     //public static final String ptxPath = "src/main/java/lb2/cuda/embossDownscale2x_2d2d.ptx";
+    //static Class<? extends GpuFrameProcessor> gpuFrameProcessorClass = CudaFrameProcessor2d2d.class;
 
     // CudaFrameProcessor3d2d
     public static final String ptxPath = "src/main/java/lb2/cuda/embossDownscale2x_3d2d.ptx";
-
     static Class<? extends GpuFrameProcessor> gpuFrameProcessorClass = CudaFrameProcessor3d2d.class;
+
 
     public static void main(String[] args) throws Exception {
 
@@ -44,58 +43,52 @@ class Main {
             inputVideoPath = "src/main/java/statics/videos/input/video_3.mp4";
         }
 
-        int[] numberOfWorkersGrid = new int[]{1};
-        int timesToRepeat = 0;
-
         HashMap<Integer, List<Long>> results = new HashMap<>();
         List<FrameResult> frameResults;
 
         // Болид должен начинать гонку разогретым
         int warmup_repeats = 0;
+        int numberOfWorkers = 1;
+        int timesToRepeat = 1;
 
-        for (int gridIdx = 0; gridIdx < numberOfWorkersGrid.length; gridIdx++) {
+        for (int iteration = 0; iteration < timesToRepeat + warmup_repeats; iteration++) {
+            // Определение объекта пайплайна
+            // Он создает воркеров, блокирующие очереди для задач и все остальное
+            VideoProcessingPipeline processingPipeline = new VideoProcessingPipeline(
+                    numberOfWorkers, 500, 500);
 
-            int numberOfWorkers = numberOfWorkersGrid[gridIdx];
-            System.out.println("\n\nStart benchmark for n_workers = " + numberOfWorkers);
+            processingPipeline.preprocess(inputVideoPath);
+            // Немного временени форы, чтобы препроцессинг положил кадры для обработки в очередь задач
+            Thread.sleep(5000);
 
-            for (int iteration = 0; iteration < timesToRepeat + warmup_repeats; iteration++) {
-                // Определение объекта пайплайна
-                // Он создает воркеров, блокирующие очереди для задач и все остальное
-                VideoProcessingPipeline processingPipeline = new VideoProcessingPipeline(
-                        numberOfWorkers, 500, 500);
+            // Определяю, что я хочу делать с каждыйм кадром - это абстракция задачи
+            GpuFrameProcessor gpuFrameProcessor = gpuFrameProcessorClass
+                    .getDeclaredConstructor(String.class)
+                    .newInstance(ptxPath);
 
-                processingPipeline.preprocess(inputVideoPath);
-                // Немного временени форы, чтобы препроцессинг положил кадры для обработки в очередь задач
-                Thread.sleep(5000);
+            FrameTask videoFrameTask = new ApplyConvolutionalMatrixTask(gpuFrameProcessor);
 
-                // Определяю, что я хочу делать с каждыйм кадром - это абстракция задачи
-                GpuFrameProcessor gpuFrameProcessor = gpuFrameProcessorClass
-                        .getDeclaredConstructor(String.class)
-                        .newInstance(ptxPath);
+            long enterTime = System.nanoTime(); // Время входа
 
-                FrameTask videoFrameTask = new ApplyConvolutionalMatrixTask(gpuFrameProcessor);
+            // Тут происходит запуск всего. В объекте пайплайна, что был определен выше
+            frameResults = processingPipeline.process(videoFrameTask);
 
-                long enterTime = System.nanoTime(); // Время входа
+            long exitTime = System.nanoTime(); // Время выхода
+            long duration = (exitTime - enterTime) / 1_000_000; // выводим за сколько выполнилась обработка
+            System.out.println("Execution time = " + duration + "ms");
 
-                // Тут происходит запуск всего. В объекте пайплайна, что был определен выше
-                frameResults = processingPipeline.process(videoFrameTask);
-
-                long exitTime = System.nanoTime(); // Время выхода
-                long duration = (exitTime - enterTime) / 1_000_000; // выводим за сколько выполнилась обработка
-                System.out.println("Execution time = " + duration + "ms");
-
-                // Для разогревочных запусков результат не сохраняем
-                if (iteration >= warmup_repeats) {
-                    results.computeIfAbsent(numberOfWorkers, k -> new ArrayList<>()).add(duration);
-                }
+            // Для разогревочных запусков результат не сохраняем
+            if (iteration >= warmup_repeats) {
+                results.computeIfAbsent(numberOfWorkers, k -> new ArrayList<>()).add(duration);
             }
-
         }
+
 
         System.out.println(results);
 
         // Код ниже использовался для компилияции видео, на котором будут подписи сцен и прочего
         String outputVideoPath = "output.mp4";
+
         compileVideo(inputVideoPath, outputVideoPath);
     }
 
@@ -114,5 +107,4 @@ class Main {
 
         processingPipeline.compile(frameResults, outputVideoPath);
     }
-
 }
