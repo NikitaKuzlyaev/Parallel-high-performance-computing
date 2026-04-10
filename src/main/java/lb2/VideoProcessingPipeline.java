@@ -88,7 +88,7 @@ class VideoProcessingPipeline {
         // но потом запустил на видео с большим разрешением и шрифт стал слишком мелким
         // решил его скейлить пропорционально ширине
         double base_height = 480;
-        double base_font_size = 12;
+        double base_font_size = 18;
         double big_font_cf = 1.25;
         double font_size = base_font_size * (height / base_height);
         double big_font_size = font_size * big_font_cf;
@@ -113,7 +113,6 @@ class VideoProcessingPipeline {
         // Сортируем FrameResult объекты по их индексам (чтобы идти в цикле и склеивать их в правильном порядке)
         frames.sort(Comparator.comparingInt(FrameResult::index));
 
-        double[] prev_vector = new double[3 * frames.get(0).result().length]; // вектор "гистограмм" предыдущего кадра
         int current_scene = 0; // номер текущей сцены
 
         // для каждого кадра выполняем...
@@ -134,30 +133,9 @@ class VideoProcessingPipeline {
             // все остальное шрифтом обычной толщины
             g.setFont(new Font("Arial", Font.PLAIN, (int) font_size));
 
-            // далее подписываем на картинке значение вектора - сверху вниз по одной компоненте
-            // также каждый канал красим в соответсвующий цвет
-            int n = frameResult.result().length / 3;
-            int it = -1;
             double cur_y = base_cur_y;
-
-            for (int i = 0; i < frameResult.result().length; i++) {
-
-                if (i % n == 0) {
-                    cur_y += offset;
-                    it++;
-                }
-                g.setColor(colors[it]);
-
-                g.drawString(String.valueOf(frameResult.result()[i]), 10, (int) cur_y);
-                cur_y += offset;
-            }
-
-
-            prev_vector = frameResult.result(); // "текущий" вектор станет "предыдущим" для следующего кадра
-
             // подписываем номер сцены
-            cur_y += offset * 4;
-            g.drawString("Scene = " + String.valueOf(current_scene), 10, (int) cur_y);
+            //cur_y += offset * 4;
             g.dispose();
 
             // записываем кадр в видео

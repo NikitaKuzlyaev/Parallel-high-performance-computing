@@ -34,9 +34,10 @@ public class ApplyConvolutionalMatrixTask implements FrameTask {
         // GPU обработка
         byte[] resultRgb = gpuFrameProcessor.process(rgb, width, height);
         // RGB → BGR
+
         byte[] resultBgr = rgbToBgr(resultRgb);
 
-        BufferedImage resultImage = buildImage(resultBgr, width, height);
+        BufferedImage resultImage = buildImage(resultBgr, width / 2, height / 2);
         return new FrameResult(frame.getFrameNumber(), resultImage, null);
     }
 }

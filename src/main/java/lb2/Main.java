@@ -21,12 +21,12 @@ class Main {
 
         {
             // Видео 1
-            inputVideoPath = "src/main/java/statics/videos/input/video_1.avi";
+            //inputVideoPath = "src/main/java/statics/videos/input/video_1.avi";
         }
 
         {
             // Видео 2
-            // inputVideoPath = "src/main/java/statics/videos/input/video_2.mp4";
+            inputVideoPath = "src/main/java/statics/videos/input/video_2.mp4";
         }
 
         {
