@@ -27,7 +27,6 @@ public class FrameWorker implements Runnable {
         try {
             // ждем работу бесконечно или пока нас не прервут
             while (true) {
-                System.out.println("Worker in FrameWorker.run()");
                 // берем задачу
                 FrameCapsule capsule = queue.take();
 
@@ -39,7 +38,7 @@ public class FrameWorker implements Runnable {
 
                 FrameResult result = task.process(capsule); // иначе запускаем обработку
                 results.put(result); // результат кладем в очередь
-                System.out.println("Worker done!");
+                System.out.println("Done processing of frame number=" + result.index());
 
             }
         } catch (Throwable t) {

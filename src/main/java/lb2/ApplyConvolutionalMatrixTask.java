@@ -19,8 +19,6 @@ public class ApplyConvolutionalMatrixTask implements FrameTask {
 
     @Override
     public FrameResult process(FrameCapsule frame) {
-        System.out.println("Enter in ApplyConvolutionalMatrixTask.process()");
-
         BufferedImage input = frame.getImage();
         BufferedImage image = ensure3ByteBGR(input);
 

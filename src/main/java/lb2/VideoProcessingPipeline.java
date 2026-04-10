@@ -41,7 +41,6 @@ class VideoProcessingPipeline {
     }
 
     public List<FrameResult> process(FrameTask task) throws Exception {
-        System.out.println("Enter in VideoProcessingPipeline.process()");
         /*
         Метод, который запускает все воркеры для обработки кадров
          */
@@ -113,10 +112,9 @@ class VideoProcessingPipeline {
         // Сортируем FrameResult объекты по их индексам (чтобы идти в цикле и склеивать их в правильном порядке)
         frames.sort(Comparator.comparingInt(FrameResult::index));
 
-        int current_scene = 0; // номер текущей сцены
-
         // для каждого кадра выполняем...
         for (FrameResult frameResult : frames) {
+            double cur_y = base_cur_y;
 
             // берем этот кадр, на всякий случай переводим в 3 канала (были проблемки с этим связанные)
             BufferedImage frame = frameResult.image();
@@ -124,20 +122,13 @@ class VideoProcessingPipeline {
 
             Graphics2D g = img.createGraphics(); // класс, позволяющий рисовать
             g.drawImage(frame, 0, 0, null);
-
             g.setFont(new Font("Arial", Font.BOLD, (int) big_font_size));
             g.setColor(Color.RED);
+
             // Подписываем в уголке номер кадра жирным красным шрифтом
             g.drawString(String.valueOf(frameResult.index()), 10, 30);
 
-            // все остальное шрифтом обычной толщины
-            g.setFont(new Font("Arial", Font.PLAIN, (int) font_size));
-
-            double cur_y = base_cur_y;
-            // подписываем номер сцены
-            //cur_y += offset * 4;
             g.dispose();
-
             // записываем кадр в видео
             recorder.record(converter.convert(img));
         }
