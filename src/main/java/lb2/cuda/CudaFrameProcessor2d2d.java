@@ -6,13 +6,13 @@ import jcuda.Pointer;
 
 import static jcuda.driver.JCudaDriver.*;
 
-public class CudaFrameProcessor implements GpuFrameProcessor {
+public class CudaFrameProcessor2d2d implements GpuFrameProcessor {
 
     private final CUcontext context;
     private final CUmodule module;
     private final CUfunction function;
 
-    public CudaFrameProcessor(String ptxPath) {
+    public CudaFrameProcessor2d2d(String ptxPath) {
         JCudaDriver.setExceptionsEnabled(true);
 
         cuInit(0);
@@ -27,12 +27,11 @@ public class CudaFrameProcessor implements GpuFrameProcessor {
         cuModuleLoad(module, ptxPath);
 
         function = new CUfunction();
-        cuModuleGetFunction(function, module, "embossDownscale2x");
+        cuModuleGetFunction(function, module, "embossDownscale2x_2d2d");
     }
 
     @Override
     public synchronized byte[] process(byte[] input, int width, int height) {
-        System.out.println("Enter in CudaFrameProcessor.process()");
 
         if (input.length != width * height * 3) {
             throw new IllegalArgumentException("input length does not match width*height*3");
@@ -75,7 +74,6 @@ public class CudaFrameProcessor implements GpuFrameProcessor {
                     0, null,
                     kernelParams, null
             );
-            System.out.println("Done cuLaunchKernel");
 
             cuCtxSynchronize();
             cuMemcpyDtoH(Pointer.to(output), dOutput, output.length);
