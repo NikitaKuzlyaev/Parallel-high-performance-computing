@@ -17,17 +17,17 @@ public class Main {
 
         {
             // Видео 1
-            inputVideoPath = "src/main/java/lb1/statics/videos/input/video_1.avi";
+            inputVideoPath = "src/main/java/statics/videos/input/video_1.avi";
         }
 
         {
             // Видео 2
-            // inputVideoPath = "src/main/java/lb1/statics/videos/input/video_2.mp4";
+            // inputVideoPath = "src/main/java/statics/videos/input/video_2.mp4";
         }
 
         {
             // Видео 3
-            // inputVideoPath = "src/main/java/lb1/statics/videos/input/video_3.mp4";
+            // inputVideoPath = "src/main/java/statics/videos/input/video_3.mp4";
         }
 
         //int numberOfWorkers = 2;

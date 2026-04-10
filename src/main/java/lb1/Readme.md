@@ -59,16 +59,16 @@
 ### Результаты бенчмарка
 
 #### Видеофайл 1
-![video_1_graph_1.png](statics/graphics/video_1_graph_1.png)
+![video_1_graph_1.png](../statics/graphics/video_1_graph_1.png)
 
-![video_1_graph_2.png](statics/graphics/video_1_graph_2.png)
+![video_1_graph_2.png](../statics/graphics/video_1_graph_2.png)
 
 #### Видеофайл 2
-![video_2_graph_1.png](statics/graphics/video_2_graph_1.png)
+![video_2_graph_1.png](../statics/graphics/video_2_graph_1.png)
 
-![video_2_graph_2.png](statics/graphics/video_2_graph_2.png)
+![video_2_graph_2.png](../statics/graphics/video_2_graph_2.png)
 
 #### Видеофайл 3
-![video_3_graph_1.png](statics/graphics/video_3_graph_1.png)
+![video_3_graph_1.png](../statics/graphics/video_3_graph_1.png)
 
-![video_3_graph_2.png](statics/graphics/video_3_graph_2.png)
+![video_3_graph_2.png](../statics/graphics/video_3_graph_2.png)
