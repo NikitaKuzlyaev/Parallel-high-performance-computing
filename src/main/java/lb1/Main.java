@@ -46,7 +46,7 @@ public class Main {
         List<FrameResult> frameResults;
 
         // Болид должен начинать гонку разогретым
-        int warmup_repeats = 0;
+        int warmup_repeats = 1;
 
 
         for (int gridIdx = 0; gridIdx < numberOfWorkersGrid.length; gridIdx++) {
