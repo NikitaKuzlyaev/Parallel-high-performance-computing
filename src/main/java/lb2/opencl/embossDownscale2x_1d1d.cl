@@ -1,3 +1,41 @@
+uchar embossAt(
+    __global const uchar* input,
+    int width,
+    int height,
+    int x,
+    int y,
+    int c
+) {
+    if (x == 0 || y == 0 || x == width - 1 || y == height - 1) {
+        int idx = (y * width + x) * 3 + c;
+        return input[idx];
+    }
+
+    const int k[3][3] = {
+        {-2, -1, 0},
+        {-1,  1, 1},
+        { 0,  1, 2}
+    };
+
+    int sum = 0;
+
+    for (int ky = -1; ky <= 1; ky++) {
+        for (int kx = -1; kx <= 1; kx++) {
+            int nx = x + kx;
+            int ny = y + ky;
+            int nidx = (ny * width + nx) * 3 + c;
+            sum += k[ky + 1][kx + 1] * (int)input[nidx];
+        }
+    }
+
+    sum += 128;
+
+    if (sum < 0) sum = 0;
+    if (sum > 255) sum = 255;
+
+    return (uchar)sum;
+}
+
 __kernel void embossDownscale2x_1d1d(
     __global const uchar* input,
     __global uchar* output,
@@ -13,33 +51,22 @@ __kernel void embossDownscale2x_1d1d(
     int gid = groupId * localSize + localId;
 
     int total = outWidth * outHeight;
-    if (gid >= total) {
-        return;
-    }
+    if (gid >= total) return;
 
-    int x = gid % outWidth;
-    int y = gid / outWidth;
+    int ox = gid % outWidth;
+    int oy = gid / outWidth;
 
-    int srcX = x * 2;
-    int srcY = y * 2;
+    int x0 = ox * 2;
+    int y0 = oy * 2;
 
-    // Индексы соседних пикселей для emboss
-    int x1 = srcX;
-    int y1 = srcY;
-    int x2 = min(srcX + 1, width - 1);
-    int y2 = min(srcY + 1, height - 1);
-
-    int idx1 = (y1 * width + x1) * 3;
-    int idx2 = (y2 * width + x2) * 3;
-
-    int outIdx = (y * outWidth + x) * 3;
+    int outIdx = (oy * outWidth + ox) * 3;
 
     for (int c = 0; c < 3; c++) {
-        int v = (int)input[idx2 + c] - (int)input[idx1 + c] + 128;
+        int p00 = (int)embossAt(input, width, height, x0,     y0,     c);
+        int p10 = (int)embossAt(input, width, height, x0 + 1, y0,     c);
+        int p01 = (int)embossAt(input, width, height, x0,     y0 + 1, c);
+        int p11 = (int)embossAt(input, width, height, x0 + 1, y0 + 1, c);
 
-        if (v < 0) v = 0;
-        if (v > 255) v = 255;
-
-        output[outIdx + c] = (uchar)v;
+        output[outIdx + c] = (uchar)((p00 + p10 + p01 + p11) / 4);
     }
 }
