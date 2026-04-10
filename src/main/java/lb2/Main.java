@@ -2,7 +2,8 @@ package lb2;
 
 import common.FrameResult;
 import common.FrameTask;
-import lb2.cuda.CudaFrameProcessor;
+import lb2.cuda.CudaFrameProcessor2d2d;
+import lb2.cuda.CudaFrameProcessor3d2d;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +11,16 @@ import java.util.List;
 
 class Main {
 
-    public static final String ptxPath = "src/main/java/lb2/cuda/emboss.ptx";
+
+    // Раскоментировать необходимый путь для используемоего GpuFrameProcessor
+
+    // CudaFrameProcessor2d2d
+    //public static final String ptxPath = "src/main/java/lb2/cuda/embossDownscale2x_2d2d.ptx";
+
+    // CudaFrameProcessor3d2d
+    public static final String ptxPath = "src/main/java/lb2/cuda/embossDownscale2x_3d2d.ptx";
+
+    static Class<? extends GpuFrameProcessor> gpuFrameProcessorClass = CudaFrameProcessor3d2d.class;
 
     public static void main(String[] args) throws Exception {
 
@@ -26,12 +36,12 @@ class Main {
 
         {
             // Видео 2
-            inputVideoPath = "src/main/java/statics/videos/input/video_2.mp4";
+            //inputVideoPath = "src/main/java/statics/videos/input/video_2.mp4";
         }
 
         {
             // Видео 3
-            // inputVideoPath = "src/main/java/statics/videos/input/video_3.mp4";
+            inputVideoPath = "src/main/java/statics/videos/input/video_3.mp4";
         }
 
         int[] numberOfWorkersGrid = new int[]{1};
@@ -59,7 +69,10 @@ class Main {
                 Thread.sleep(5000);
 
                 // Определяю, что я хочу делать с каждыйм кадром - это абстракция задачи
-                GpuFrameProcessor gpuFrameProcessor = new CudaFrameProcessor(ptxPath);
+                GpuFrameProcessor gpuFrameProcessor = gpuFrameProcessorClass
+                        .getDeclaredConstructor(String.class)
+                        .newInstance(ptxPath);
+
                 FrameTask videoFrameTask = new ApplyConvolutionalMatrixTask(gpuFrameProcessor);
 
                 long enterTime = System.nanoTime(); // Время входа
@@ -88,11 +101,17 @@ class Main {
 
     static private void compileVideo(String inputVideoPath, String outputVideoPath) throws Exception {
         VideoProcessingPipeline processingPipeline = new VideoProcessingPipeline(
-                12, 500, 500);
+                1, 500, 500);
+
         processingPipeline.preprocess(inputVideoPath);
-        GpuFrameProcessor gpuFrameProcessor = new CudaFrameProcessor(ptxPath);
+
+        GpuFrameProcessor gpuFrameProcessor = gpuFrameProcessorClass
+                .getDeclaredConstructor(String.class)
+                .newInstance(ptxPath);
+
         FrameTask videoFrameTask = new ApplyConvolutionalMatrixTask(gpuFrameProcessor);
         List<FrameResult> frameResults = processingPipeline.process(videoFrameTask);
+
         processingPipeline.compile(frameResults, outputVideoPath);
     }
 
