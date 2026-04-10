@@ -3,6 +3,7 @@ package lb2;
 import common.FrameResult;
 import common.FrameTask;
 import lb2.opencl.OpenClFrameProcessor1d1d;
+import lb2.opencl.OpenClFrameProcessor2d2d;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,12 +13,12 @@ public class MainOpenCL {
     // Раскоментировать необходимый путь для используемоего GpuFrameProcessor
 
     // OpenClFrameProcessor1d1d
-    public static final String clPath = "src/main/java/lb2/opencl/embossDownscale2x_1d1d.cl";
-    static Class<? extends GpuFrameProcessor> gpuFrameProcessorClass = OpenClFrameProcessor1d1d.class;
+//    public static final String clPath = "src/main/java/lb2/opencl/embossDownscale2x_1d1d.cl";
+//    static Class<? extends GpuFrameProcessor> gpuFrameProcessorClass = OpenClFrameProcessor1d1d.class;
 
     // OpenClFrameProcessor2d2d
-    //public static final String clPath = "src/main/java/lb2/opencl/embossDownscale2x_2d2d.cl";
-    //static Class<? extends GpuFrameProcessor> gpuFrameProcessorClass = OpenClFrameProcessor2d2d.class;
+    public static final String clPath = "src/main/java/lb2/opencl/embossDownscale2x_2d2d.cl";
+    static Class<? extends GpuFrameProcessor> gpuFrameProcessorClass = OpenClFrameProcessor2d2d.class;
 
 
     public static void main(String[] args) throws Exception {
