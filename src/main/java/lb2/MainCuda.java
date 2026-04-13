@@ -47,9 +47,9 @@ class MainCuda {
         List<FrameResult> frameResults;
 
         // Болид должен начинать гонку разогретым
-        int warmup_repeats = 0;
+        int warmup_repeats = 3;
         int numberOfWorkers = 1;
-        int timesToRepeat = 1;
+        int timesToRepeat = 10;
 
         for (int iteration = 0; iteration < timesToRepeat + warmup_repeats; iteration++) {
             // Определение объекта пайплайна
@@ -59,7 +59,7 @@ class MainCuda {
 
             processingPipeline.preprocess(inputVideoPath);
             // Немного временени форы, чтобы препроцессинг положил кадры для обработки в очередь задач
-            Thread.sleep(5000);
+            Thread.sleep(2000);
 
             // Определяю, что я хочу делать с каждыйм кадром - это абстракция задачи
             GpuFrameProcessor gpuFrameProcessor = gpuFrameProcessorClass

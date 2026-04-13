@@ -13,8 +13,8 @@ public class MainOpenCL {
     // Раскоментировать необходимый путь для используемоего GpuFrameProcessor
 
     // OpenClFrameProcessor1d1d
-//    public static final String clPath = "src/main/java/lb2/opencl/embossDownscale2x_1d1d.cl";
-//    static Class<? extends GpuFrameProcessor> gpuFrameProcessorClass = OpenClFrameProcessor1d1d.class;
+    //public static final String clPath = "src/main/java/lb2/opencl/embossDownscale2x_1d1d.cl";
+    //static Class<? extends GpuFrameProcessor> gpuFrameProcessorClass = OpenClFrameProcessor1d1d.class;
 
     // OpenClFrameProcessor2d2d
     public static final String clPath = "src/main/java/lb2/opencl/embossDownscale2x_2d2d.cl";
@@ -30,7 +30,7 @@ public class MainOpenCL {
 
         {
             // Видео 1
-            inputVideoPath = "src/main/java/statics/videos/input/video_1.avi";
+            //inputVideoPath = "src/main/java/statics/videos/input/video_1.avi";
         }
 
         {
@@ -40,16 +40,16 @@ public class MainOpenCL {
 
         {
             // Видео 3
-            //inputVideoPath = "src/main/java/statics/videos/input/video_3.mp4";
+            inputVideoPath = "src/main/java/statics/videos/input/video_3.mp4";
         }
 
         HashMap<Integer, List<Long>> results = new HashMap<>();
         List<FrameResult> frameResults;
 
         // Болид должен начинать гонку разогретым
-        int warmup_repeats = 0;
+        int warmup_repeats = 3;
         int numberOfWorkers = 1;
-        int timesToRepeat = 1;
+        int timesToRepeat = 10;
 
         for (int iteration = 0; iteration < timesToRepeat + warmup_repeats; iteration++) {
             // Определение объекта пайплайна
@@ -59,7 +59,7 @@ public class MainOpenCL {
 
             processingPipeline.preprocess(inputVideoPath);
             // Немного временени форы, чтобы препроцессинг положил кадры для обработки в очередь задач
-            Thread.sleep(5000);
+            Thread.sleep(2000);
 
             // Определяю, что я хочу делать с каждыйм кадром - это абстракция задачи
             GpuFrameProcessor gpuFrameProcessor = gpuFrameProcessorClass
