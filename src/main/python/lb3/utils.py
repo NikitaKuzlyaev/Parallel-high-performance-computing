@@ -14,6 +14,10 @@ def save_json(data: object, path: str) -> None:
 
 
 def compute_section_winners(rows: list[dict]) -> list[dict]:
+    """
+    Метод для вычисления "победителя" по каждой категории
+    (по сумме числа изображений, таблиц и ссылок)
+    """
     best_by_section: dict[str, dict] = {}
 
     for row in rows:
@@ -38,7 +42,9 @@ def compute_section_winners(rows: list[dict]) -> list[dict]:
 
 
 def benchmark(func):
-
+    """
+    Декоратор для замера времени выполнения функции
+    """
     def wrap(*args, **kwargs):
         ts = time.time()
 

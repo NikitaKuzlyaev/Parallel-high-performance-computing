@@ -6,17 +6,22 @@ from typing import Optional
 
 @dataclass
 class SectionStat:
-    province: str
-    section: str
-    images: int
-    tables: int
-    references: int
+    """
+    Модель для
+    """
+    province: str  # название провинции
+    section: str  # название секции на веб-странице - заголовок h2
+    images: int  # число изображений
+    tables: int  # число таблиц
+    references: int  # число ссылок
 
     @property
     def total(self) -> int:
+        # свойство для вычисления суммы изображений + таблиц + ссылок
         return self.images + self.tables + self.references
 
     def to_dict(self) -> dict:
+        # перевод структуры в словарь
         data = asdict(self)
         data["total"] = self.total
         return data
@@ -24,15 +29,10 @@ class SectionStat:
 
 @dataclass
 class PageParseResult:
-    page_path: str
-    province: str
-    sections: list[SectionStat]
-    error: Optional[str] = None
-
-    def to_rows(self) -> list[dict]:
-        rows: list[dict] = []
-        for section in self.sections:
-            row = section.to_dict()
-            row["page_path"] = self.page_path
-            rows.append(row)
-        return rows
+    """
+    Модель для результата парсинга целой страницы
+    """
+    page_path: str  # путь к странице на диске
+    province: str  # название провинции
+    sections: list[SectionStat]  # список по всем секциям страницы
+    error: Optional[str] = None  # сюда пишется ошибка, если возникает
