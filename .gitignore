@@ -37,3 +37,48 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/src/main/python/lb3/web_pages/Banten - Wikipedia.html
+/src/main/python/lb3/web_pages/Bengkulu - Wikipedia.html
+/src/main/python/lb3/web_pages/Central Java - Wikipedia.html
+/src/main/python/lb3/web_pages/Central Papua - Wikipedia.html
+/src/main/python/lb3/web_pages/Central Kalimantan - Wikipedia.html
+/output.mp4
+/src/main/python/lb3/section_stats.json
+/src/main/python/lb3/section_winners.json
+/src/main/java/statics/videos/input/video_1.avi
+/src/main/java/statics/videos/output/video_1.mp4
+/src/main/java/statics/videos/input/video_2.mp4
+/src/main/java/statics/videos/output/video_2.mp4
+/src/main/java/statics/videos/input/video_3.mp4
+/src/main/java/statics/videos/output/video_3.mp4
+/src/main/python/lb3/web_pages/Central Sulawesi - Wikipedia.html
+/src/main/python/lb3/web_pages/East Java - Wikipedia.html
+/src/main/python/lb3/web_pages/East Kalimantan - Wikipedia.html
+/src/main/python/lb3/web_pages/East Nusa Tenggara - Wikipedia.html
+/src/main/python/lb3/errors.json
+/src/main/python/lb3/web_pages/Gorontalo - Wikipedia.html
+/src/main/python/lb3/web_pages/Highland Papua - Wikipedia.html
+/src/main/python/lb3/web_pages/Lampung - Wikipedia.html
+/src/main/python/lb3/web_pages/Jambi - Wikipedia.html
+/src/main/python/lb3/web_pages/Maluku (province) - Wikipedia.html
+/src/main/python/lb3/web_pages/North Kalimantan - Wikipedia.html
+/src/main/python/lb3/web_pages/North Sulawesi - Wikipedia.html
+/src/main/python/lb3/web_pages/North Maluku - Wikipedia.html
+/src/main/python/lb3/web_pages/North Sumatra - Wikipedia.html
+/src/main/python/lb3/web_pages/Papua (province) - Wikipedia.html
+/.idea/inspectionProfiles/profiles_settings.xml
+/src/main/python/lb3/web_pages/Riau Islands - Wikipedia.html
+/src/main/python/lb3/web_pages/Riau - Wikipedia.html
+/src/main/python/lb3/web_pages/South Kalimantan - Wikipedia.html
+/src/main/python/lb3/web_pages/South Papua - Wikipedia.html
+/src/main/python/lb3/web_pages/South Sumatra - Wikipedia.html
+/src/main/python/lb3/web_pages/Southwest Papua - Wikipedia.html
+/src/main/python/lb3/web_pages/South Sulawesi - Wikipedia.html
+/src/main/python/lb3/web_pages/Special Region of Yogyakarta - Wikipedia.html
+/src/main/python/lb3/web_pages/Southeast Sulawesi - Wikipedia.html
+/src/main/python/lb3/web_pages/West Sumatra - Wikipedia.html
+/src/main/python/lb3/web_pages/West Sulawesi - Wikipedia.html
+/src/main/python/lb3/web_pages/West Papua (province) - Wikipedia.html
+/src/main/python/lb3/web_pages/West Nusa Tenggara - Wikipedia.html
+/src/main/python/lb3/web_pages/West Kalimantan - Wikipedia.html
+/src/main/python/lb3/web_pages/West Java - Wikipedia.html
