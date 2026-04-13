@@ -38,7 +38,7 @@ public class FrameWorker implements Runnable {
 
                 FrameResult result = task.process(capsule); // иначе запускаем обработку
                 results.put(result); // результат кладем в очередь
-                System.out.println("Done processing of frame number=" + result.index());
+                //System.out.println("Done processing of frame number=" + result.index());
 
             }
         } catch (Throwable t) {

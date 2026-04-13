@@ -27,12 +27,11 @@ public class CudaFrameProcessor2d2d implements GpuFrameProcessor {
         cuModuleLoad(module, ptxPath);
 
         function = new CUfunction();
-        cuModuleGetFunction(function, module, "embossDownscale2x_2d2d");
+        cuModuleGetFunction(function, module, "embossDownscale2x");
     }
 
     @Override
     public synchronized byte[] process(byte[] input, int width, int height) {
-
         if (input.length != width * height * 3) {
             throw new IllegalArgumentException("input length does not match width*height*3");
         }

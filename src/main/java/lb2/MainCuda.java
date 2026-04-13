@@ -68,6 +68,7 @@ class MainCuda {
 
             FrameTask videoFrameTask = new ApplyConvolutionalMatrixTask(gpuFrameProcessor);
 
+            System.out.println("Start working");
             long enterTime = System.nanoTime(); // Время входа
 
             // Тут происходит запуск всего. В объекте пайплайна, что был определен выше
@@ -89,7 +90,7 @@ class MainCuda {
         // Код ниже использовался для компилияции видео, на котором будут подписи сцен и прочего
         String outputVideoPath = "output.mp4";
 
-        compileVideo(inputVideoPath, outputVideoPath);
+        //compileVideo(inputVideoPath, outputVideoPath);
     }
 
     static private void compileVideo(String inputVideoPath, String outputVideoPath) throws Exception {
