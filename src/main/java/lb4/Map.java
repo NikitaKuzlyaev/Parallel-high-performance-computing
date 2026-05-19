@@ -11,21 +11,39 @@ public class Map {
     public List<Node> crossings;
     public List<Node> botSpawnPoints;
     public List<Node> agentSpawnPoints;
+    public List<Node> targetPoints;
     public List<Node> graph;
 
     private Node[][] matrix;
 
     static class Node {
 
-        private boolean isCrossing; // является ли перекрестком
+        public boolean isCrossing; // является ли перекрестком
         private final int type;
+        private int x;
+        private int y;
         private final List<Node> neighbors;
 
-        public Node(int type) {
+        public Node(int type, int x, int y) {
             this.type = type;
             this.neighbors = new ArrayList<>();
+            this.x = x;
+            this.y = y;
         }
 
+        public Node getNeighborByDirection(Direction dir) {
+            int[] dxdy = Util.castDirection2vector(dir);
+
+            int nx = this.x + dxdy[0];
+            int ny = this.y + dxdy[1];
+
+            for (Node u : this.neighbors) {
+                if (u.x == nx && u.y == ny) {
+                    return u;
+                }
+            }
+            return null;
+        }
     }
 
     public void compile(String filepath) {
@@ -61,7 +79,7 @@ public class Map {
 
                 for (int j = 0; j < m; j++) {
                     int type = Integer.parseInt(parts[j]);
-                    Node node = new Node(type);
+                    Node node = new Node(type, i - 1, j);
                     matrix[i - 1][j] = node;
                 }
             }
@@ -87,6 +105,7 @@ public class Map {
                 switch (thisNode.type) {
                     case 2 -> this.agentSpawnPoints.add(thisNode);
                     case 3 -> this.botSpawnPoints.add(thisNode);
+                    case 4 -> this.targetPoints.add(thisNode);
                 }
 
                 int neighbors = 0;
@@ -144,5 +163,35 @@ public class Map {
 
     static class Util {
         public static final int[][] directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+
+        public static int[] castDirection2vector(Direction dir) {
+            switch (dir) {
+                case UP -> {
+                    return directions[3];
+                }
+                case DOWN -> {
+                    return directions[2];
+                }
+                case LEFT -> {
+                    return directions[1];
+                }
+                case RIGHT -> {
+                    return directions[0];
+                }
+            }
+            return directions[0];
+        }
+
+    }
+
+    enum Direction {
+        UP, DOWN, LEFT, RIGHT;
+
+        private static final Direction[] DIRS = values();
+
+        public Direction turn(int r) {
+            int next = Math.floorMod(this.ordinal() + r, DIRS.length);
+            return DIRS[next];
+        }
     }
 }

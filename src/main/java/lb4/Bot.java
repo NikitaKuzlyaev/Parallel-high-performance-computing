@@ -13,8 +13,8 @@ public class Bot extends Agent {
     }
 
     @Override
-    public void make_action() {
-        super.make_action();
+    public void applyAction() {
+        super.applyAction();
         this.ttl--;
 
         if (this.ttl == 0) {

@@ -1,10 +1,7 @@
 package lb4;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Pipeline implements Runnable {
@@ -38,9 +35,9 @@ public class Pipeline implements Runnable {
 
         Episode episode = new Episode();
 
-        Agent agent = new Deliveler(agentBehaviour);
+        Map.Node deliveryTarget = map.targetPoints.get(ThreadLocalRandom.current().nextInt(map.targetPoints.size()));
+        Agent agent = new Deliveler(agentBehaviour, deliveryTarget);
         episode.registerAgent(agent);
-
 
         int steps = 0;
 
@@ -48,7 +45,10 @@ public class Pipeline implements Runnable {
 
             playStep(episode);
             steps++;
+        }
 
+        if (agent.currentPosition == agent.target) {
+            // победа
         }
 
     }
@@ -57,20 +57,57 @@ public class Pipeline implements Runnable {
         // заспавнить ботов
         spawnBots(episode);
 
+        for (Agent agent : episode.activeAgents) {
+            agent.make_action();
+        }
         // удалить тех агентов, что столкнутся
-        List<Agent> agents = checkCollisions();
-
-        for (var agent: agents){
+        Set<Agent> collidesAgents = checkCollisions(episode);
+        for (var agent : collidesAgents) {
             episode.activeAgents.remove(agent);
         }
 
         // передвинуть всех агентов
+        for (var agent : episode.activeAgents) {
+            agent.applyAction();
+            if (!agent.isAlive) {
+                episode.activeAgents.remove(agent);
+            }
+        }
 
 
     }
 
-    private List<Agent> checkCollisions() {
-        return null;
+    private Set<Agent> checkCollisions(Episode episode) {
+        // столкновение или на дороге или на ноде
+        Set<Agent> collidesAgents = new HashSet<>();
+
+        // НОДА
+        // для каждого бота надо проверить куда он идет
+        HashMap<Map.Node, List<Agent>> endPositions = new HashMap<>();
+        for (Agent agent : episode.activeAgents) {
+            endPositions
+                    .computeIfAbsent(agent.nextPosition, k -> new ArrayList<>())
+                    .add(agent);
+        }
+        for (var key : endPositions.keySet()) {
+            if (endPositions.get(key).size() >= 2) {
+                collidesAgents.addAll(endPositions.get(key));
+            }
+        }
+        // ДОРОГА
+        // перебрать все пары агентов. проверить что они сталкиваются
+        for (Agent agent1 : episode.activeAgents) {
+            for (Agent agent2 : episode.activeAgents) {
+                if (agent1 == agent2) {
+                    continue;
+                }
+                if (agent1.nextPosition == agent2.currentPosition && agent1.currentPosition == agent2.nextPosition) {
+                    collidesAgents.add(agent1);
+                    collidesAgents.add(agent2);
+                }
+            }
+        }
+        return collidesAgents;
     }
 
     private void spawnBots(Episode episode) {

@@ -7,17 +7,33 @@ public class Agent {
     Map.Node target;
     Map.Node currentPosition;
     Map.Node previousPosition;
+    Map.Direction moveDirection;
+    Map.Node nextPosition;
 
-    public Agent(){
+    public Agent() {
         this.isAlive = true;
     }
 
-    public void make_action(){
-        Map.Node nextNode = behaviour.makeAction(this);
+    public Map.Node make_action() {
+        if (nextPosition != null) {
+            return nextPosition;
+        }
+        nextPosition = behaviour.makeAction(this);
+        return nextPosition;
     }
 
-    public void setTarget(){
+    public void applyAction() {
+        if (nextPosition == null) {
+            return;
+        }
 
+        previousPosition = currentPosition;
+        currentPosition = nextPosition;
+        nextPosition = null;
+    }
+
+    public void setTarget(Map.Node target) {
+        this.target = target;
     }
 
 }
