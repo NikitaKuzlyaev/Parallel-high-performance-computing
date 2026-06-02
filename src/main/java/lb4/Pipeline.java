@@ -272,15 +272,25 @@ public class Pipeline implements Runnable {
         playEpisode(demoBehaviour, 0.05, true);
     }
 
-    private void spawnBots(Episode episode) {
+    private void saveFrame(Episode episode, int step) {
+        String filename = String.format("step_%03d.txt", step);
+        String text = "step = " + step + "\n" + map.asText(episode.activeAgents);
 
-        for (int i = 0; i < this.map.botSpawnPoints.size(); i++) {
-            if (ThreadLocalRandom.current().nextDouble() < episode.propBotSpawn) {
-                int ttl = 15 + ThreadLocalRandom.current().nextInt(136);
-                Agent bot = new Bot(botBehaviour, ttl);
-                episode.registerAgent(bot);
-            }
+        try {
+            Files.writeString(outputPath.resolve("frames").resolve(filename), text);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
+    }
+
+    private String format(double value) {
+        return String.format(java.util.Locale.US, "%.4f", value);
+    }
+
+    private Map.Node randomNode(List<Map.Node> nodes) {
+        int index = ThreadLocalRandom.current().nextInt(nodes.size());
+        return nodes.get(index);
+    }
 
     private static class Episode {
         List<Agent> activeAgents = new ArrayList<>();
