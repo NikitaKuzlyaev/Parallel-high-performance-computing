@@ -32,7 +32,7 @@ public class Map {
         private final int type;
         private int x;
         private int y;
-        private final List<Node> neighbors;
+        final List<Node> neighbors;
 
         public Node(int type, int x, int y) {
             this.type = type;
