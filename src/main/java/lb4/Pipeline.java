@@ -1,14 +1,40 @@
 package lb4;
 
 import java.io.IOException;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Pipeline implements Runnable {
 
-    private Behaviour agentBehaviour;
-    private Behaviour botBehaviour;
+    private static final int MAX_STEPS = 2000;
+    private static final int EPISODES_PER_SERIES = 100;
+
+    private final String mapPath;
+    private final Path outputPath;
+    private final Behaviour botBehaviour;
+    private final ExecutorService executor;
+
     private Map map;
+
+    public Pipeline() {
+        this("citymap.txt", "output");
+    }
+
+    public Pipeline(String mapPath, String outputPath) {
+        this.mapPath = mapPath;
+        this.outputPath = Path.of(outputPath);
+        this.botBehaviour = Behaviour.botBehaviour();
+        this.executor = Executors.newFixedThreadPool(2);
+    }
 
     @Override
     public void run() {
