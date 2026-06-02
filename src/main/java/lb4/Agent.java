@@ -1,5 +1,7 @@
 package lb4;
 
+
+// базовы класс для наследования от него реализаций любых управляемых агентов
 public class Agent {
 
     public boolean isAlive;

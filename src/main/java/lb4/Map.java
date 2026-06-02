@@ -10,11 +10,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Map {
 
-    public List<Node> crossings;
-    public List<Node> botSpawnPoints;
-    public List<Node> agentSpawnPoints;
-    public List<Node> targetPoints;
-    public List<Node> graph;
+    public List<Node> crossings; // список перекрестков
+    public List<Node> botSpawnPoints; // список спавнов ботов
+    public List<Node> agentSpawnPoints; // список спавном агента-доставщика
+    public List<Node> targetPoints; // список точек назначения для агента-доставщика
+    public List<Node> graph; // Полный граф города
 
     private Node[][] matrix;
 
@@ -26,13 +26,14 @@ public class Map {
         graph = new ArrayList<>();
     }
 
+    // структура для клетки
     static class Node {
 
         public boolean isCrossing; // является ли перекрестком
-        private final int type;
-        private int x;
+        private final int type; // 0, 1, 2, 3 или 4
+        private int x; // координаты
         private int y;
-        final List<Node> neighbors;
+        final List<Node> neighbors; // список соседних вершин-клеток
 
         public Node(int type, int x, int y) {
             this.type = type;
@@ -41,6 +42,7 @@ public class Map {
             this.neighbors = new ArrayList<>();
         }
 
+        // для получения соседней клетки в заданном направлении
         public Node getNeighborByDirection(Direction direction) {
             int nx = x + direction.dx;
             int ny = y + direction.dy;
@@ -54,17 +56,20 @@ public class Map {
         }
     }
 
+    // создать ВСЁ
     public void compile(String filepath) {
         matrix = readMapFromFile(filepath);
         buildRoads();
         findKeyPoints();
     }
 
+    // для переданной вершины выдать случайную соседнюю с нет
     public Direction getRandomDirection(Node node) {
         Node next = node.neighbors.get(ThreadLocalRandom.current().nextInt(node.neighbors.size()));
         return Direction.between(node, next);
     }
 
+    // перевести в текстовое представление
     public String asText(Collection<Agent> agents) {
         char[][] chars = new char[matrix.length][matrix[0].length];
 
@@ -101,6 +106,7 @@ public class Map {
         return asText(List.of());
     }
 
+    // для чтения карты из txt файла
     private Node[][] readMapFromFile(String filepath) {
         Path path = Path.of(filepath);
 
@@ -126,6 +132,7 @@ public class Map {
         }
     }
 
+    // метод для нахождения ключевых точек - type = 2, 3 или 4
     private void findKeyPoints() {
         crossings.clear();
         botSpawnPoints.clear();
@@ -155,6 +162,7 @@ public class Map {
         }
     }
 
+    // для каждой из клеток прокинуть ссылки на соседей
     private void buildRoads() {
         for (int x = 0; x < matrix.length; x++) {
             for (int y = 0; y < matrix[0].length; y++) {
@@ -179,6 +187,7 @@ public class Map {
         }
     }
 
+    // енум для направлений
     enum Direction {
         UP(-1, 0),
         DOWN(1, 0),
@@ -192,6 +201,8 @@ public class Map {
             this.dx = dx;
             this.dy = dy;
         }
+
+        // далее методы для мапинга направления, учитывая текущее направление
 
         public Direction left() {
             return switch (this) {

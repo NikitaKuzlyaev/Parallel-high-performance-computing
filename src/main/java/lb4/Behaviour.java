@@ -43,11 +43,13 @@ public class Behaviour {
             return null;
         }
 
+        // возврат назад после остановки на предыдущем ходе
         if (agent.backAfterStop) {
             agent.backAfterStop = false;
             return getBackNode(agent);
         }
 
+        // отдельная логика для перекрестков и обычных дорог
         if (agent.currentPosition.isCrossing) {
             return makeCrossingAction(agent);
         }
@@ -61,6 +63,7 @@ public class Behaviour {
 
     private Node makeCrossingAction(Agent agent) {
 
+        // бот чаще останавливается и выбирает случайный выход
         if (type == Type.BOT) {
             if (ThreadLocalRandom.current().nextDouble() < 0.10) {
                 agent.backAfterStop = true;
@@ -69,12 +72,13 @@ public class Behaviour {
             return chooseRandomExit(agent);
         }
 
+        // обычные агенты иногда останавливаются на перекрестке
         if (ThreadLocalRandom.current().nextDouble() < 0.05) {
             agent.backAfterStop = true;
             return agent.currentPosition;
         }
 
-
+        // выбор направления зависит от выбранной стратегии
         return switch (type) {
             case RIGHT_HAND -> chooseByWeights(agent, 0.40, 0.30, 0.25);
             case LEFT_HAND -> chooseByWeights(agent, 0.25, 0.30, 0.40);
@@ -85,11 +89,13 @@ public class Behaviour {
 
     private Node makeRoadAction(Agent agent) {
 
+        // агент продолжает движение вперед, если путь доступен
         Node forward = agent.currentPosition.getNeighborByDirection(agent.moveDirection);
         if (forward != null && forward != agent.previousPosition) {
             return forward;
         }
 
+        // если вперед нельзя, выбирается любой доступный выход
         List<Node> exits = getExits(agent, false);
         if (!exits.isEmpty()) {
             return exits.get(ThreadLocalRandom.current().nextInt(exits.size()));
@@ -100,6 +106,8 @@ public class Behaviour {
 
     private Node chooseByWeights(Agent agent, double rightWeight, double straightWeight, double leftWeight) {
         List<WeightedNode> variants = new ArrayList<>();
+
+        // добавляются только доступные направления
         addVariant(variants, agent, agent.moveDirection.right(), rightWeight);
         addVariant(variants, agent, agent.moveDirection, straightWeight);
         addVariant(variants, agent, agent.moveDirection.left(), leftWeight);
@@ -113,6 +121,7 @@ public class Behaviour {
             totalWeight += variant.weight;
         }
 
+        // случайная точка определяет направление с учетом весов
         double point = ThreadLocalRandom.current().nextDouble(totalWeight);
         for (WeightedNode variant : variants) {
             point -= variant.weight;
@@ -142,6 +151,7 @@ public class Behaviour {
     private List<Node> getExits(Agent agent, boolean allowBack) {
         List<Node> exits = new ArrayList<>();
 
+        // обратный путь исключается, если он не разрешен явно
         for (Node node : agent.currentPosition.neighbors) {
             if (allowBack || node != agent.previousPosition) {
                 exits.add(node);
@@ -151,6 +161,7 @@ public class Behaviour {
     }
 
     private Node getBackNode(Agent agent) {
+        // сначала агент пытается вернуться в предыдущую позицию
         if (agent.previousPosition != null) {
             return agent.previousPosition;
         }

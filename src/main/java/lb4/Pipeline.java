@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Pipeline implements Runnable {
 
     private static final int MAX_STEPS = 2000;
-    private static final int EPISODES_PER_SERIES = 100;
+    private static final int EPISODES_PER_SERIES = 1000;
 
     private final String mapPath;
     private final Path outputPath;
@@ -33,6 +33,8 @@ public class Pipeline implements Runnable {
         this.mapPath = mapPath;
         this.outputPath = Path.of(outputPath);
         this.botBehaviour = Behaviour.botBehaviour();
+
+        // пул потоков для параллельного расчета действий агентов
         this.executor = Executors.newFixedThreadPool(2);
     }
 
@@ -41,10 +43,12 @@ public class Pipeline implements Runnable {
         try {
             Files.createDirectories(outputPath.resolve("frames"));
 
+            // загрузка карты и сохранение ее исходного вида
             map = new Map();
             map.compile(mapPath);
             Files.writeString(outputPath.resolve("map.txt"), map.baseMapText());
 
+            // запуск серий экспериментов и сохранение результатов
             List<ResultRow> results = runExperiments();
             writeJson(results);
             writeDemoFrames();
@@ -59,7 +63,7 @@ public class Pipeline implements Runnable {
     }
 
     private List<ResultRow> runExperiments() {
-        double[] botSpawnChances = {0.01, 0.02, 0.05, 0.08, 0.10};
+        double[] botSpawnChances = {0.0, 0.001, 0.005, 0.01, 0.02, 0.05, 0.08, 0.10, 0.15, 0.20, 0.50};
 
         Behaviour.Type[] strategies = {
                 Behaviour.Type.RIGHT_HAND,
@@ -69,6 +73,7 @@ public class Pipeline implements Runnable {
 
         List<ResultRow> results = new ArrayList<>();
 
+        // каждая стратегия проверяется при разных шансах появления ботов
         for (Behaviour.Type strategy : strategies) {
             Behaviour agentBehaviour = Behaviour.agentBehaviour(strategy);
 
@@ -76,6 +81,7 @@ public class Pipeline implements Runnable {
                 int successCount = 0;
                 int totalSteps = 0;
 
+                // серия запусков нужна для усреднения случайных результатов
                 for (int i = 0; i < EPISODES_PER_SERIES; i++) {
                     EpisodeResult result = playEpisode(agentBehaviour, spawnChance, false);
 
@@ -107,6 +113,7 @@ public class Pipeline implements Runnable {
     private EpisodeResult playEpisode(Behaviour agentBehaviour, double botSpawnChance, boolean saveFrames) {
         Episode episode = new Episode(botSpawnChance);
 
+        // случайный выбор старта, цели и начального направления
         Map.Node start = randomNode(map.agentSpawnPoints);
         Map.Node target = randomNode(map.targetPoints);
         Map.Direction direction = map.getRandomDirection(start);
@@ -122,6 +129,7 @@ public class Pipeline implements Runnable {
 
         int steps = 0;
 
+        // эпизод идет до смерти агента или достижения лимита шагов
         while (agent.isAlive && steps < MAX_STEPS) {
             playStep(episode);
             steps++;
@@ -141,8 +149,10 @@ public class Pipeline implements Runnable {
         List<Agent> agents = new ArrayList<>(episode.activeAgents);
 
         try {
+            // сначала рассчитывается действие доставщика
             executor.submit(() -> episode.deliveryAgent.make_action()).get();
 
+            // затем рассчитываются действия всех живых ботов
             executor.submit(() -> {
                 for (Agent agent : agents) {
                     if (agent instanceof Bot && agent.isAlive) {
@@ -154,6 +164,7 @@ public class Pipeline implements Runnable {
             throw new RuntimeException(ex);
         }
 
+        // агенты, попавшие в столкновение, помечаются как погибшие
         Set<Agent> crashed = checkCollisions(episode);
         for (Agent agent : crashed) {
             agent.isAlive = false;
@@ -161,6 +172,7 @@ public class Pipeline implements Runnable {
 
         List<Agent> aliveAgents = new ArrayList<>();
 
+        // после проверки столкновений применяются рассчитанные действия
         for (Agent agent : episode.activeAgents) {
             if (agent.isAlive) {
                 agent.applyAction();
@@ -178,6 +190,7 @@ public class Pipeline implements Runnable {
         for (Map.Node point : map.botSpawnPoints) {
             double value = ThreadLocalRandom.current().nextDouble();
 
+            // бот появляется на точке спавна с заданной вероятностью
             if (value < episode.botSpawnChance) {
                 int ttl = 15 + ThreadLocalRandom.current().nextInt(136);
                 Map.Direction direction = map.getRandomDirection(point);
@@ -193,18 +206,21 @@ public class Pipeline implements Runnable {
 
         java.util.Map<Map.Node, List<Agent>> nextPositions = new HashMap<>();
 
+        // группировка агентов по следующим позициям
         for (Agent agent : episode.activeAgents) {
             nextPositions
                     .computeIfAbsent(agent.nextPosition, key -> new ArrayList<>())
                     .add(agent);
         }
 
+        // столкновение происходит, если несколько агентов идут в одну клетку
         for (List<Agent> agents : nextPositions.values()) {
             if (agents.size() > 1) {
                 crashed.addAll(agents);
             }
         }
 
+        // отдельная проверка обмена позициями между двумя агентами
         for (int i = 0; i < episode.activeAgents.size(); i++) {
             for (int j = i + 1; j < episode.activeAgents.size(); j++) {
                 Agent first = episode.activeAgents.get(i);
@@ -232,6 +248,7 @@ public class Pipeline implements Runnable {
         json.append("  \"maxSteps\": ").append(MAX_STEPS).append(",\n");
         json.append("  \"results\": [\n");
 
+        // ручная сборка json с результатами всех экспериментов
         for (int i = 0; i < results.size(); i++) {
             ResultRow row = results.get(i);
 
@@ -258,6 +275,7 @@ public class Pipeline implements Runnable {
     private void writeDemoFrames() throws IOException {
         Path framesPath = outputPath.resolve("frames");
 
+        // перед новой демонстрацией старые кадры удаляются
         try (var files = Files.list(framesPath)) {
             files.forEach(file -> {
                 try {
