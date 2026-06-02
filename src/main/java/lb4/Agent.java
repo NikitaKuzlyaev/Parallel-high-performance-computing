@@ -9,6 +9,7 @@ public class Agent {
     Map.Node previousPosition;
     Map.Direction moveDirection;
     Map.Node nextPosition;
+    boolean backAfterStop;
 
     public Agent() {
         this.isAlive = true;
@@ -23,17 +24,27 @@ public class Agent {
     }
 
     public void applyAction() {
-        if (nextPosition == null) {
+        if (nextPosition == null || nextPosition == currentPosition) {
+            nextPosition = null;
             return;
         }
 
+        moveDirection = Map.Direction.between(currentPosition, nextPosition);
         previousPosition = currentPosition;
         currentPosition = nextPosition;
         nextPosition = null;
+    }
+
+    public void setStartPosition(Map.Node startPosition, Map.Direction startDirection) {
+        this.currentPosition = startPosition;
+        this.moveDirection = startDirection;
     }
 
     public void setTarget(Map.Node target) {
         this.target = target;
     }
 
+    public char getSymbol() {
+        return '?';
+    }
 }

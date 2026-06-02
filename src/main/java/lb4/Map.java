@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Map {
 
@@ -16,6 +18,14 @@ public class Map {
 
     private Node[][] matrix;
 
+    public Map() {
+        crossings = new ArrayList<>();
+        botSpawnPoints = new ArrayList<>();
+        agentSpawnPoints = new ArrayList<>();
+        targetPoints = new ArrayList<>();
+        graph = new ArrayList<>();
+    }
+
     static class Node {
 
         public boolean isCrossing; // является ли перекрестком
@@ -26,20 +36,18 @@ public class Map {
 
         public Node(int type, int x, int y) {
             this.type = type;
-            this.neighbors = new ArrayList<>();
             this.x = x;
             this.y = y;
+            this.neighbors = new ArrayList<>();
         }
 
-        public Node getNeighborByDirection(Direction dir) {
-            int[] dxdy = Util.castDirection2vector(dir);
+        public Node getNeighborByDirection(Direction direction) {
+            int nx = x + direction.dx;
+            int ny = y + direction.dy;
 
-            int nx = this.x + dxdy[0];
-            int ny = this.y + dxdy[1];
-
-            for (Node u : this.neighbors) {
-                if (u.x == nx && u.y == ny) {
-                    return u;
+            for (Node node : neighbors) {
+                if (node.x == nx && node.y == ny) {
+                    return node;
                 }
             }
             return null;
@@ -47,14 +55,50 @@ public class Map {
     }
 
     public void compile(String filepath) {
-
-        // 1. считать карту из файла
-        this.matrix = readMapFromFile(filepath);
-        findKeyPoints();
+        matrix = readMapFromFile(filepath);
         buildRoads();
+        findKeyPoints();
+    }
 
-        // 3. запустить bfs от перекрустков чтобы для каждой точки определить куда можно двигаться при спавне
+    public Direction getRandomDirection(Node node) {
+        Node next = node.neighbors.get(ThreadLocalRandom.current().nextInt(node.neighbors.size()));
+        return Direction.between(node, next);
+    }
 
+    public String asText(Collection<Agent> agents) {
+        char[][] chars = new char[matrix.length][matrix[0].length];
+
+        for (int x = 0; x < matrix.length; x++) {
+            for (int y = 0; y < matrix[0].length; y++) {
+                Node node = matrix[x][y];
+                chars[x][y] = switch (node.type) {
+                    case 1 -> '#';
+                    case 2 -> 'S';
+                    case 3 -> 'P';
+                    case 4 -> 'T';
+                    default -> '.';
+                };
+            }
+        }
+
+        for (Agent agent : agents) {
+            if (agent.isAlive && agent.currentPosition != null) {
+                chars[agent.currentPosition.x][agent.currentPosition.y] = agent.getSymbol();
+            }
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for (char[] row : chars) {
+            for (char cell : row) {
+                builder.append(cell);
+            }
+            builder.append('\n');
+        }
+        return builder.toString();
+    }
+
+    public String baseMapText() {
+        return asText(List.of());
     }
 
     private Node[][] readMapFromFile(String filepath) {
@@ -62,96 +106,72 @@ public class Map {
 
         try {
             List<String> lines = Files.readAllLines(path);
-
-            String firstLine = lines.get(0);
-            String[] parts = firstLine.trim().split("\\s+");
+            String[] parts = lines.get(0).trim().split("\\s+");
 
             int n = Integer.parseInt(parts[0]);
             int m = Integer.parseInt(parts[1]);
-
-            Node[][] matrix = new Node[n][m];
+            Node[][] result = new Node[n][m];
 
             for (int i = 1; i <= n; i++) {
-                String line = lines.get(i);
-                parts = line.trim().split("\\s+");
-
-                assert parts.length == m; // Должно быть m чисел
-
+                parts = lines.get(i).trim().split("\\s+");
                 for (int j = 0; j < m; j++) {
                     int type = Integer.parseInt(parts[j]);
-                    Node node = new Node(type, i - 1, j);
-                    matrix[i - 1][j] = node;
+                    result[i - 1][j] = new Node(type, i - 1, j);
                 }
             }
-            return matrix;
+            return result;
         } catch (IOException ex) {
             System.out.println("Ошибка чтения файла " + ex.getMessage());
-            throw new RuntimeException();
+            throw new RuntimeException(ex);
         }
     }
 
     private void findKeyPoints() {
-        int n = this.matrix.length;
-        int m = this.matrix[0].length;
+        crossings.clear();
+        botSpawnPoints.clear();
+        agentSpawnPoints.clear();
+        targetPoints.clear();
+        graph.clear();
 
-        for (int x = 0; x < n; x++) {
-            for (int y = 0; y < m; y++) {
-                Node thisNode = this.matrix[x][y];
-
-                if (thisNode.type == 1) {
+        for (Node[] row : matrix) {
+            for (Node node : row) {
+                if (node.type == 1) {
                     continue;
                 }
 
-                switch (thisNode.type) {
-                    case 2 -> this.agentSpawnPoints.add(thisNode);
-                    case 3 -> this.botSpawnPoints.add(thisNode);
-                    case 4 -> this.targetPoints.add(thisNode);
+                graph.add(node);
+
+                switch (node.type) {
+                    case 2 -> agentSpawnPoints.add(node);
+                    case 3 -> botSpawnPoints.add(node);
+                    case 4 -> targetPoints.add(node);
                 }
 
-                int neighbors = 0;
-
-                for (int k = 0; k < Util.directions.length; k++) {
-                    int dx = Util.directions[k][0];
-                    int dy = Util.directions[k][1];
-
-                    if (x + dx >= 0 && x + dx < n && y + dy >= 0 && y + dy < m) {
-                        Node otherNode = this.matrix[x + dx][y + dy];
-                        if (otherNode.type != 1) {
-                            neighbors++;
-                        }
-                    }
-                }
-
-                if (neighbors > 2) {
-                    thisNode.isCrossing = true;
-                    this.crossings.add(thisNode);
+                if (node.neighbors.size() > 2) {
+                    node.isCrossing = true;
+                    crossings.add(node);
                 }
             }
         }
-
     }
 
     private void buildRoads() {
-        int n = this.matrix.length;
-        int m = this.matrix[0].length;
+        for (int x = 0; x < matrix.length; x++) {
+            for (int y = 0; y < matrix[0].length; y++) {
+                Node node = matrix[x][y];
 
-        for (int x = 0; x < n; x++) {
-            for (int y = 0; y < m; y++) {
-
-                Node thisNode = this.matrix[x][y];
-
-                if (thisNode.type == 1) {
+                if (node.type == 1) {
                     continue;
                 }
 
-                for (int k = 0; k < Util.directions.length; k++) {
-                    int dx = Util.directions[k][0];
-                    int dy = Util.directions[k][1];
+                for (Direction direction : Direction.values()) {
+                    int nx = x + direction.dx;
+                    int ny = y + direction.dy;
 
-                    if (x + dx >= 0 && x + dx < n && y + dy >= 0 && y + dy < m) {
-                        Node otherNode = this.matrix[x + dx][y + dy];
+                    if (nx >= 0 && nx < matrix.length && ny >= 0 && ny < matrix[0].length) {
+                        Node otherNode = matrix[nx][ny];
                         if (otherNode.type != 1) {
-                            thisNode.neighbors.add(otherNode);
+                            node.neighbors.add(otherNode);
                         }
                     }
                 }
@@ -159,39 +179,57 @@ public class Map {
         }
     }
 
-    public
+    enum Direction {
+        UP(-1, 0),
+        DOWN(1, 0),
+        LEFT(0, -1),
+        RIGHT(0, 1);
 
-    static class Util {
-        public static final int[][] directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        final int dx;
+        final int dy;
 
-        public static int[] castDirection2vector(Direction dir) {
-            switch (dir) {
-                case UP -> {
-                    return directions[3];
-                }
-                case DOWN -> {
-                    return directions[2];
-                }
-                case LEFT -> {
-                    return directions[1];
-                }
-                case RIGHT -> {
-                    return directions[0];
-                }
-            }
-            return directions[0];
+        Direction(int dx, int dy) {
+            this.dx = dx;
+            this.dy = dy;
         }
 
-    }
+        public Direction left() {
+            return switch (this) {
+                case UP -> LEFT;
+                case DOWN -> RIGHT;
+                case LEFT -> DOWN;
+                case RIGHT -> UP;
+            };
+        }
 
-    enum Direction {
-        UP, DOWN, LEFT, RIGHT;
+        public Direction right() {
+            return switch (this) {
+                case UP -> RIGHT;
+                case DOWN -> LEFT;
+                case LEFT -> UP;
+                case RIGHT -> DOWN;
+            };
+        }
 
-        private static final Direction[] DIRS = values();
+        public Direction opposite() {
+            return switch (this) {
+                case UP -> DOWN;
+                case DOWN -> UP;
+                case LEFT -> RIGHT;
+                case RIGHT -> LEFT;
+            };
+        }
 
-        public Direction turn(int r) {
-            int next = Math.floorMod(this.ordinal() + r, DIRS.length);
-            return DIRS[next];
+        public static Direction between(Node from, Node to) {
+            int dx = to.x - from.x;
+            int dy = to.y - from.y;
+
+            for (Direction direction : values()) {
+                if (direction.dx == dx && direction.dy == dy) {
+                    return direction;
+                }
+            }
+            return RIGHT;
         }
     }
 }
